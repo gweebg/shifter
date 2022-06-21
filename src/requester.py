@@ -24,7 +24,7 @@ year_to_id: dict = {'1': first_year,
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-# chrome_options.add_argument("--headless") # Makes a silent scrape by not showing the browser.
+chrome_options.add_argument("--headless") # Makes a silent scrape by not showing the browser.
 
 chrome_service = Service(ChromeDriverManager().install())
 
