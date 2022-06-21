@@ -48,7 +48,19 @@ def get_name(title: str) -> str:
     return title.split("\n")[0].strip()
 
 
-def parse_schedule(course_name: str, year: str, date: str, shifts: dict = None) -> dict:
+def parse_schedule(course_name: str, year: str, date: str, shifts: dict | None = None) -> dict:
+    """
+    Downloads the schedule html page using 'schedule_lookup' and parses it into a dict representing the schedule.
+
+    :param course_name: The course name to lookup.
+    :param year: The school year of the schedule.
+    :param date: Date of the day we make the request.
+    :param shifts: Optional parameter, if provided filters for shifts on dict.
+
+    :return: The dictionary containing a representation of the schedule.
+    :raises ParsingError: If there's an error while parsing the html page.
+    """
+
     # File path where the html for the schedule is stored.
     schedule_filename: str = schedule_lookup(course_name, year, date)
 
@@ -59,7 +71,7 @@ def parse_schedule(course_name: str, year: str, date: str, shifts: dict = None) 
 
     items: ResultSet = soup.find_all("table", {"class": table_class})[0].find_all("tr")
 
-    logging.info(f"Loaded file {schedule_filename} successfully!")
+    print(f"Loaded file {schedule_filename} successfully!")
 
     # We are returning this dictionary when it's populated.
     all_subjects = {
@@ -74,7 +86,7 @@ def parse_schedule(course_name: str, year: str, date: str, shifts: dict = None) 
     cw: int = 0
     ch: int = 0
 
-    logging.info("Started parsing the schedule.")
+    print("Started parsing the schedule.")
 
     # In this type of schedules the days are divided in <td> elements and the time is divided in <tr> elements.
     for tr in items:
@@ -125,5 +137,5 @@ def parse_schedule(course_name: str, year: str, date: str, shifts: dict = None) 
         # Updating hour counter.
         ch = 0 if ch == len(HOURS) - 1 else ch + 1
 
-    logging.info("Finished parsing!")
+    print("Finished parsing!")
     return all_subjects
