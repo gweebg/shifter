@@ -1,13 +1,10 @@
 # Outside libraries
-import cchardet
+import cchardet # Do not remove.
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 
 # Built-in libraries
-import re
-from json import dump, dumps
 from typing import List
-import logging
 
 # Local modules
 # from generator import generate_schedule
@@ -16,10 +13,21 @@ from elements import table_class, HOURS
 
 
 class ParsingError(Exception):
+    """
+    Custom exception for parsing errors.
+    """
     pass
 
 
 def get_weekdays(soup: BeautifulSoup) -> List[str]:
+    """
+    Returns a list with the work days of a schedule.
+
+    :param soup: BeautifulSoup object in which to look.
+    :return: List containing every occupied weekday.
+    :rtype: List[str]
+    """
+
     table = (soup.find_all("table", class_="rsHorizontalHeaderTable"))[0]
     weekdays = table.find_all("a")
 
@@ -29,6 +37,14 @@ def get_weekdays(soup: BeautifulSoup) -> List[str]:
 
 
 def get_time(style: str) -> float:
+    """
+    Returns the 'time' value from a html style string based on the height parameter.
+
+    :param style: String containing every style values.
+    :return: The extracted time value.
+    :rtype: float
+    """
+
     position: int = style.find("height")
 
     if position != -1:
@@ -39,12 +55,28 @@ def get_time(style: str) -> float:
 
 
 def get_shift(title: str) -> str:
+    """
+    Returns the shift from a schedule block title.
+
+    :param title: Title of the block.
+    :return: A string containing the shift value (e.g. 'PL9', 'TP1', ...).
+    :rtype: str
+    """
+
     # Title example: "Redes de Computadores\n [CG - Edificio 2 - 0.28]\n T2"
     title: List[str] = title.split("\n")
     return title[2]
 
 
 def get_name(title: str) -> str:
+    """
+    Returns the course name value from a schedule block title.
+
+    :param title: Title of the block.
+    :return: A string containing the course name value.
+    :rtype: str
+    """
+
     return title.split("\n")[0].strip()
 
 

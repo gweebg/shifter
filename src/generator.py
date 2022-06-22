@@ -1,19 +1,27 @@
 # Outside libraries
 import xlsxwriter as excel
 
-# Built-in libraries
-from typing import List
-
 # Local modules
 from elements import (dark_color_format, light_color_format, colors,
                       header_format, weekdays_map, hours_map, merge_format)
 from parser import ParsingError
 
 
-def generate_schedule(schedule: dict, path: str | None = None):
+def generate_schedule(schedule: dict, path: str | None = None) -> None:
+    """
+    Generates the schedule as an Excel worksheet using the result from 'parse_schedule'.
+    If 'path' is not provided the result file name will be 'new_schedule.xlsx'.
+    The 'schedule' object has to be filtered by shifts. Can't be a full schedule.
+
+    :param schedule: Dictionary containing parsed schedule by a set of shifts.
+    :param path: The path of the file to be generated.
+    :return: None
+    :raises ParsingError: If, for some reason, a duration value is not in {1.0, 2.0}.
+    """
+
     # If given path is None then set path to default value.
     if path is None:
-        path: str = "new_schedule.xlsx"
+        path: str = "../schedules/new_schedule.xlsx"
 
     # Creating a new Excel workbook.
     with excel.Workbook(path) as workbook:

@@ -29,8 +29,13 @@ chrome_options.add_argument("--headless") # Makes a silent scrape by not showing
 chrome_service = Service(ChromeDriverManager().install())
 
 
-class InvalidParameter(Exception):
-    pass
+class InvalidParameter(TypeError):
+    """
+    Custom exception for invalid parameters.
+    """
+    def __init__(self, expression, message):
+        self.expression = expression
+        self.message = message
 
 
 def check_date(date: str) -> bool:
@@ -62,7 +67,7 @@ def check_course_parameters(course_name: str, year: str, date: str) -> None:
 
     distances = {}
 
-    with open('./docs/course_names.txt', 'r', encoding='utf-8') as file:
+    with open('../docs/course_names.txt', 'r', encoding='utf-8') as file:
 
         for line in file:
             dist: float = 1 - (levenshtein_distance(line, course_name) / float(max(len(line), len(course_name))))
@@ -76,16 +81,16 @@ def check_course_parameters(course_name: str, year: str, date: str) -> None:
             if check_date(date):
                 return
             else:
-                raise InvalidParameter("Date not valid: Date must use the format dd-mm-YYYY.")
+                raise InvalidParameter(date, "Date not valid: Date must use the format dd-mm-YYYY.")
         else:
-            raise InvalidParameter("Year not valid: Year has to be a values between 1 and 4 (inclusive).")
+            raise InvalidParameter(year, "Year not valid: Year has to be a values between 1 and 4 (inclusive).")
 
     elif distances[best_match] >= 0.80:
         stripped = best_match.replace('\n', "")
-        raise InvalidParameter(f"Course name not found: Did you mean '{stripped}' ?")
+        raise InvalidParameter(course_name, f"Course name not found: Did you mean '{stripped}' ?")
 
     else:
-        raise InvalidParameter("Course name not found: You can check every course name at "
+        raise InvalidParameter(course_name, "Course name not found: You can check every course name at "
                         "https://www.uminho.pt/PT/ensino/oferta-educativa/paginas/licenciaturas-e-mestrados"
                         "-integrados.aspx")
 
@@ -103,11 +108,11 @@ def schedule_lookup(course_name: str, year: str, date: str) -> str:
     """
 
     file_name = course_name.replace('\n', '').replace(' ', '_').lower() + '_' + date + '_' + year + '.html'
-    for file in os.listdir('./schedules/'):
+    for file in os.listdir('../schedules/'):
         if file == file_name:
             print(f"Found an existing file for the given parameters: {file}")
             print("Skipping fetch and continuing with stored file...")
-            return './schedules/' + file
+            return '../schedules/' + file
 
     check_course_parameters(course_name, year, date)
 
@@ -136,7 +141,7 @@ def schedule_lookup(course_name: str, year: str, date: str) -> str:
     expand = driver.find_element(By.ID, expand_check)
     expand.click()
 
-    formatted_filename = f'./schedules/{file_name}'
+    formatted_filename = f'../schedules/{file_name}'
     with open(formatted_filename, 'w', encoding='utf-8') as file:
         file.write(driver.page_source)
 

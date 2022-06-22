@@ -49,6 +49,13 @@ header_format = {
     "bg_color": "#666666",
 }
 
+merge_format = {
+    'border': 1,
+    'align': 'center',
+    'valign': 'vcenter',
+    'text_wrap': True
+}
+
 weekdays_map = {
     "Segunda-Feira": "B",
     "Terça-Feira": "C",
@@ -64,11 +71,4 @@ hours_map = {
     "17h00": 11, "18h00": 12, "19h00": 13, "20h00": 14
 }
 
-merge_format = {
-    'border': 1,
-    'align': 'center',
-    'valign': 'vcenter',
-    'text_wrap': True
-}
-
-colors = ["#BAF2BB", "#BAF2D8", "#F2BAC9", "#F4F7F9", "#F4F39A"]
+colors = ["#BAF2BB", "#BAF2D8", "#F2BAC9", "#F4F7F9", "#F4F39A", "#AA4465"]
