@@ -17,6 +17,8 @@ def generate_schedule(schedule: dict, path: str | None = None) -> None:
     :param path: The path of the file to be generated.
     :return: None
     :raises ParsingError: If, for some reason, a duration value is not in {1.0, 2.0}.
+
+    TODO: Accept half hours.
     """
 
     # If given path is None then set path to default value.

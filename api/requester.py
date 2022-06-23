@@ -13,6 +13,7 @@ import datetime
 
 # Local modules
 from elements import *
+from exceptions import ParsingError, InvalidParameter
 
 # ASP form webpage to scrape.
 URL: str = "https://alunos.uminho.pt/pt/estudantes/paginas/infouteishorarios.aspx"
@@ -24,18 +25,9 @@ year_to_id: dict = {'1': first_year,
 
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-chrome_options.add_argument("--headless") # Makes a silent scrape by not showing the browser.
+chrome_options.add_argument("--headless")  # Makes a silent scrape by not showing the browser.
 
 chrome_service = Service(ChromeDriverManager().install())
-
-
-class InvalidParameter(TypeError):
-    """
-    Custom exception for invalid parameters.
-    """
-    def __init__(self, expression, message):
-        self.expression = expression
-        self.message = message
 
 
 def check_date(date: str) -> bool:
@@ -91,8 +83,8 @@ def check_course_parameters(course_name: str, year: str, date: str) -> None:
 
     else:
         raise InvalidParameter(course_name, "Course name not found: You can check every course name at "
-                        "https://www.uminho.pt/PT/ensino/oferta-educativa/paginas/licenciaturas-e-mestrados"
-                        "-integrados.aspx")
+                                            "https://www.uminho.pt/PT/ensino/oferta-educativa/paginas/licenciaturas-e-mestrados"
+                                            "-integrados.aspx")
 
 
 def schedule_lookup(course_name: str, year: str, date: str) -> str:
@@ -116,36 +108,41 @@ def schedule_lookup(course_name: str, year: str, date: str) -> str:
 
     check_course_parameters(course_name, year, date)
 
-    # Setting up a chrome environment with the parameters above.
-    driver = webdriver.Chrome(options=chrome_options, service=chrome_service)
-    driver.get(URL)
+    try:
+        
+        # Setting up a chrome environment with the parameters above.
+        driver = webdriver.Chrome(options=chrome_options, service=chrome_service)
+        driver.get(URL)
 
-    # Enter the course name onto the text input bar.
-    text_input = driver.find_element(By.NAME, search_bar)
-    text_input.send_keys(course_name)
+        # Enter the course name onto the text input bar.
+        text_input = driver.find_element(By.NAME, search_bar)
+        text_input.send_keys(course_name)
 
-    # Click on the button to get the page of schedule.
-    search = driver.find_element(By.ID, search_button)
-    search.click()
+        # Click on the button to get the page of schedule.
+        search = driver.find_element(By.ID, search_button)
+        search.click()
 
-    # Click on the year select button.
-    year_input = driver.find_element(By.ID, year_to_id[year])
-    year_input.click()
+        # Click on the year select button.
+        year_input = driver.find_element(By.ID, year_to_id[year])
+        year_input.click()
 
-    # Select the date when the schedule came out.
-    date_input = driver.find_element(By.ID, date_bar)  # Date format : dd-mm-YYYY
-    date_input.clear()
-    date_input.send_keys(date)
+        # Select the date when the schedule came out.
+        date_input = driver.find_element(By.ID, date_bar)  # Date format : dd-mm-YYYY
+        date_input.clear()
+        date_input.send_keys(date)
 
-    # Expand schedule in order to get the full html document, it also acts like a search button.
-    expand = driver.find_element(By.ID, expand_check)
-    expand.click()
+        # Expand schedule in order to get the full html document, it also acts like a search button.
+        expand = driver.find_element(By.ID, expand_check)
+        expand.click()
 
-    formatted_filename = f'../schedules/{file_name}'
-    with open(formatted_filename, 'w', encoding='utf-8') as file:
-        file.write(driver.page_source)
+        formatted_filename = f'../schedules/{file_name}'
+        with open(formatted_filename, 'w', encoding='utf-8') as file:
+            file.write(driver.page_source)
 
-    driver.close()
-    driver.quit()
+        driver.close()
+        driver.quit()
+
+    except Exception as error:
+        raise InvalidParameter(error, "Selenium broke. Maybe invalid date ? Who knows.. I don't :)")
 
     return formatted_filename

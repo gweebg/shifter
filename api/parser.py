@@ -1,5 +1,5 @@
 # Outside libraries
-import cchardet # Do not remove.
+import cchardet  # Do not remove.
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 
@@ -7,16 +7,9 @@ from bs4.element import ResultSet
 from typing import List
 
 # Local modules
-# from generator import generate_schedule
 from requester import schedule_lookup
 from elements import table_class, HOURS
-
-
-class ParsingError(Exception):
-    """
-    Custom exception for parsing errors.
-    """
-    pass
+from exceptions import ParsingError
 
 
 def get_weekdays(soup: BeautifulSoup) -> List[str]:
@@ -91,6 +84,7 @@ def parse_schedule(course_name: str, year: str, date: str, shifts: dict | None =
 
     :return: The dictionary containing a representation of the schedule.
     :raises ParsingError: If there's an error while parsing the html page.
+
     """
 
     # File path where the html for the schedule is stored.
@@ -155,13 +149,9 @@ def parse_schedule(course_name: str, year: str, date: str, shifts: dict | None =
                         }
 
                         if shifts:  # If we provide the shifts' parameter we select the shifts we want to store.
-                            try:
-                                if shift in shifts[get_name(title)]:
-                                    all_subjects[weekdays[cw - 1]].append(entry)
 
-                            except KeyError:
-                                print(f"Invalid | Missing subject from provided shifts: [{title}]")
-                                print("Skipping block...")
+                            if shift in shifts[get_name(title)]:
+                                all_subjects[weekdays[cw - 1]].append(entry)
 
                         else:   # Else we dump it all.
                             all_subjects[weekdays[cw - 1]].append(entry)
