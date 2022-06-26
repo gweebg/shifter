@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shifter/pages/home/home.dart';
 
 import 'navbar/navbar.dart';
 
@@ -14,8 +15,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shifter',
-      theme: ThemeData(primarySwatch: Colors.amber,),
-      home: MyHomePage(),
+      theme: ThemeData(primarySwatch: Colors.purple,),
+      home: HomeScreen(),
     );
   }
 }

@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^3.0.1
   url_launcher: ^6.1.4
+  dropdownfield: ^1.0.3
+  flutter_typeahead: ^4.0.0
+  checkbox_formfield: ^0.2.0
 
 dev_dependencies:
   flutter_test:
