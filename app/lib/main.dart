@@ -1,42 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:shifter/pages/home/home.dart';
+import 'package:shifter/views/home/home_view.dart';
 
-import 'navbar/navbar.dart';
+void main() => runApp(Shifter());
 
-void main() {
-  runApp(const MyApp());
-}
+class Shifter extends StatelessWidget {
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const Shifter({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Shifter',
-      theme: ThemeData(primarySwatch: Colors.purple,),
-      home: HomeScreen(),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      home: HomeView()
     );
+
   }
 }
-
-class MyHomePage extends StatelessWidget
-{
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context)
-  {
-    return Scaffold(
-      body: Container(
-          child: Column(
-            children: <Widget>[
-              Navbar()
-            ],
-        ),
-      )
-    );
-  }
-}
-
