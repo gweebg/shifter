@@ -1,4 +1,6 @@
 # Outside libraries
+import re
+
 import cchardet  # Do not remove.
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
@@ -161,3 +163,33 @@ def parse_schedule(course_name: str, year: str, date: str, shifts: dict | None =
 
     print("Finished parsing!")
     return all_subjects
+
+
+def get_schedule_subjects(course_name: str, year: str, date: str) -> list[str]:
+
+    """
+    From a json based schedule this function extracts every subject alongside its shift.
+
+    :param course_name: The course name to lookup.
+    :param year: The school year of the schedule.
+    :param date: Date of the day we make the request.
+
+    :return: A list with every subject present on the schedule (excluding duplicates).
+
+    TODO: This function re-parses the schedule, find a way to do this all at the same time.
+    """
+
+    result_dict: list[str] = []
+    schedule_json: dict = parse_schedule(course_name, year, date)
+
+    for weekday in schedule_json:
+        for entry in schedule_json[weekday]:
+            parsed: str = re.sub('\n.*?\n', '', entry['title'])
+            if parsed not in result_dict:
+                result_dict.append(parsed)
+
+    return result_dict
+
+
+
+

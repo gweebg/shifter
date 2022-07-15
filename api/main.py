@@ -7,7 +7,7 @@ import sys
 import json
 
 # Local modules
-from parser import parse_schedule
+from parser import parse_schedule, get_schedule_subjects
 from generator import generate_schedule
 from models import ScheduleRequest, JsonRequest
 
@@ -82,6 +82,24 @@ async def generate_json(entry: JsonRequest) -> dict:
         return {"error": error}
 
 
+@app.post("/courses/subjects/")
+async def get_course_details(entry: JsonRequest) -> list[str] | dict:
+    """
+        Handle for post requests at '/courses/subjects/'. Generates a list containing every subject present on a schedule.
+
+        :param entry: JsonRequest object containing data from post request.
+        :return: Returns dict containing error or the list containing the subjects.
+        :rtype: Coroutine[Any, Any, list[str] | dict]
+    """
+
+    try:
+        subjects: list[str] = get_schedule_subjects(entry.course_name, str(entry.year), entry.week_date)
+        return subjects
+
+    except Exception as error:
+        return {"error": error.__repr__()}
+
+
 def main() -> None:
     """
     Function for testing single functions of the API.
@@ -89,10 +107,12 @@ def main() -> None:
     :return: None
     """
 
-    schedule: dict = parse_schedule('Licenciatura em Engenharia Informática', '2', '19-05-2022')
+    # schedule: dict = parse_schedule('Licenciatura em Engenharia Informática', '2', '19-05-2022')
     # generate_schedule(schedule, "./schedules/DIR2ano2sem2022.xlsx")
-    formatted = json.dumps(schedule, indent=4, ensure_ascii=False)
-    print(formatted)
+    # formatted = json.dumps(schedule, indent=4, ensure_ascii=False)
+    # print(formatted)
+
+    get_schedule_subjects('Licenciatura em Engenharia Informática', '2', '19-05-2022')
 
     pass
 
