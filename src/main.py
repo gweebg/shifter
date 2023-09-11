@@ -1,3 +1,4 @@
+from src.lib.builder.builder import build_schedule_xlsx
 from src.lib.scraper.parser import ScheduleParser
 from src.lib.scraper.schedule import Schedule
 from src.lib.scraper.scraper import ScheduleScraper
@@ -26,7 +27,9 @@ def main():
         "Dados e Aprendizagem Automática": ["T1", "PL5"]
     }
 
-    print(schedule_obj.filter(shifts).get_as_dict())
+    # print(schedule_obj.filter(shifts).get_as_dict())
+
+    build_schedule_xlsx(schedule_obj.filter(shifts))
 
 
 if __name__ == '__main__':

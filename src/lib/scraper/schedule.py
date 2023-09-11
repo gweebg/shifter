@@ -1,4 +1,6 @@
 from dataclasses import asdict
+from datetime import datetime, time, timedelta
+from typing import Optional
 
 from src.lib.scraper.event import ScheduleEvent
 
@@ -27,6 +29,69 @@ class Schedule:
 
     def get_events_from_weekday(self, weekday: str) -> list[ScheduleEvent]:
         return self.schedule[weekday]
+
+    @staticmethod
+    def _calculate_final_time(when: time, duration: time) -> time:
+
+        when_delta: timedelta = timedelta(hours=when.hour, minutes=when.minute)
+        duration_delta: timedelta = timedelta(hours=duration.hour, minutes=duration.minute)
+
+        result_delta: timedelta = when_delta + duration_delta
+        return time(
+            hour=result_delta.seconds // 3600,
+            minute=(result_delta.seconds // 60) % 60
+        )
+
+    def get_starting_and_ending_time(self) -> tuple[time, time]:
+
+        # TODO | Refactor this trash code :)
+
+        starting_time: Optional[time] = None
+        ending_time: Optional[time] = None
+
+        events: list[ScheduleEvent]
+        for _, events in self.schedule.items():
+
+            event: ScheduleEvent
+            for event in events:
+
+                event_delta: timedelta = timedelta(hours=event.starts_at.hour, minutes=event.starts_at.minute)
+
+                if starting_time and ending_time:
+                    starting_delta: timedelta = timedelta(hours=starting_time.hour, minutes=starting_time.minute)
+                    ending_delta: timedelta = timedelta(hours=ending_time.hour, minutes=ending_time.minute)
+
+                if starting_time is None:
+                    starting_time = event.starts_at.time()
+
+                elif event_delta < starting_delta:
+                    starting_time = event.starts_at.time()
+
+                if ending_time is None:
+                    ending_time = self._calculate_final_time(event.starts_at.time(), event.duration.time())
+
+                else:
+
+                    event_ending: time = self._calculate_final_time(event.starts_at.time(), event.duration.time())
+                    event_ending_delta: timedelta = timedelta(hours=event_ending.hour, minutes=event_ending.minute)
+
+                    if event_ending_delta > ending_delta:
+                        ending_time = event_ending
+
+        return starting_time, ending_time
+
+    def get_events(self) -> list[ScheduleEvent]:
+
+        all_events: list[ScheduleEvent] = []
+
+        events: list[ScheduleEvent]
+        for _, events in self.schedule.items():
+
+            event: ScheduleEvent
+            for event in events:
+                all_events.append(event)
+
+        return all_events
 
     def get_course_names(self) -> list[str]:
 

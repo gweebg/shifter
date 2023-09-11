@@ -12,10 +12,10 @@ class Location:
     @classmethod
     def from_string(cls, string: str) -> "Location":
         campus, building, room = tuple(string.replace(" ", "").split("-"))
-        return cls(building=building, campus=campus, room=room)
+        return cls(building=building.replace("Edificio", "CP"), campus=campus, room=room)
 
     def __str__(self):
-        return f"{self.building} | {self.campus} | {self.room}"
+        return f"{self.campus} - {self.building} {self.room}"
 
 
 @dataclass(frozen=True)
@@ -34,7 +34,7 @@ class ScheduleBody:
         return cls(name=course_name.strip().lower(), location=location_obj, shift=shift.strip())
 
     def __str__(self):
-        return f"{self.name} | {self.location} | {self.shift}"
+        return f"{self.name.title()}\n{self.location} - {self.shift}"
 
 
 @dataclass(frozen=True)
