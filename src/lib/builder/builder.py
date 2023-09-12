@@ -1,10 +1,6 @@
-"""
-Receives 1+ schedules, merges them and generates a xlsx.
-+ Merger
-+ Builder
-"""
 from datetime import datetime, time, timedelta
 from io import BytesIO
+from typing import Optional
 
 import xlsxwriter as writer
 
@@ -47,17 +43,7 @@ def generate_time_intervals(starting_time: time, ending_time: time) -> list[str]
     return time_list
 
 
-def get_grid_maps(weekdays: list[str], time_data: list[str]) -> tuple[dict[str, str], dict[str, int]]:
-    alphabet: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    weekdays_map: dict[str, str] = {}
-
-    letter_index: int = 1
-
-    weekdays: str
-    for weekday in weekdays:
-        weekdays_map[weekday] = alphabet[letter_index]
-        letter_index = (letter_index + 1) % len(alphabet)
-
+def get_hours_map(time_data: list[str]) -> dict[str, int]:
     time_map: dict[str, int] = {}
     starting_index: int = 2
 
@@ -66,16 +52,36 @@ def get_grid_maps(weekdays: list[str], time_data: list[str]) -> tuple[dict[str, 
         time_map[time_str] = starting_index
         starting_index += 1
 
-    return weekdays_map, time_map
+    return time_map
 
 
-def build_schedule_xlsx(schedule: Schedule) -> bytes:
+def get_weekday_map(weekdays: list[str], step: int) -> dict[str, str]:
+    alphabet: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    weekdays_map: dict[str, str] = {}
 
-    output: BytesIO = BytesIO()
+    letter_index: int = 1
+
+    weekdays: str
+    for weekday in weekdays:
+        weekdays_map[weekday] = alphabet[letter_index + step]
+        letter_index = (letter_index + 1) % len(alphabet)
+
+    return weekdays_map
+
+
+def next_column(letter: str) -> str:
+    alphabet: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    return alphabet[alphabet.index(letter) + 1 % len(alphabet)]
+
+
+def build_schedule_xlsx(schedule: Schedule):  # -> bytes:
+
+    # output: BytesIO = BytesIO()
     current_date: str = datetime.now().strftime("%d-%m-%Y")
 
     # Workbook creation.
-    workbook = writer.Workbook(output)  # Saving the workbook in memory.
+    workbook = writer.Workbook("text.xlsx")
+    # workbook = writer.Workbook(output)  # Saving the workbook in memory.
     worksheet = workbook.add_worksheet(f"Your Schedule ({current_date})")
 
     # Base schedule setup (rows, columns, header, styles).
@@ -110,18 +116,27 @@ def build_schedule_xlsx(schedule: Schedule) -> bytes:
 
     # Drawing the schedule events.
 
-    weekday_map: dict[str, str]
-    time_map: dict[str, int]
-    weekday_map, time_map = get_grid_maps(schedule.weekdays, time_data)
+    weekday_step: int = 0
+    weekday_map: dict[str, str] = get_weekday_map(schedule.weekdays, weekday_step)
+
+    time_map: dict[str, int] = get_hours_map(time_data)
 
     event_color_index: dict[str, str] = {}
     color_index: int = 0
 
+    weekday: str
     events: list[ScheduleEvent]
-    for _, events in schedule.schedule.items():
+    for weekday, events in schedule.schedule.items():
+
+        collisions: list[time] = schedule.get_collisions(weekday)
+        print(collisions)
+        prev_event: Optional[ScheduleEvent] = None
 
         event: ScheduleEvent
         for event in events:
+
+            if prev_event is None:
+                prev_event = event
 
             if event.body.name not in event_color_index:
                 event_color_index[event.body.name] = styles.COLORS[color_index]
@@ -135,6 +150,12 @@ def build_schedule_xlsx(schedule: Schedule) -> bytes:
 
             mapped_row: int = time_map[event.starts_at.time().strftime("%H:%M")]
             mapped_column: str = weekday_map[event.weekday]
+
+            if event.starts_at.time() in collisions and prev_event.starts_at.time() != event.starts_at.time():
+
+                mapped_column: str = next_column(weekday_map[event.weekday])
+                weekday_step += 1
+                weekday_map = get_weekday_map(schedule.weekdays, weekday_step)
 
             if event.duration.hour == 2:
                 worksheet.merge_range(
@@ -150,6 +171,14 @@ def build_schedule_xlsx(schedule: Schedule) -> bytes:
                     merge_style
                 )
 
+            prev_event = event
+
     workbook.close()
 
-    return output.getvalue()
+    # return output.getvalue()
+
+
+"""
+For each weekday, check whether there are event collisions.
+If there is, then skip a row for each event in collision.
+"""

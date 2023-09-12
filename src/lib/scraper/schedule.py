@@ -4,18 +4,6 @@ from typing import Optional
 
 from src.lib.scraper.event import ScheduleEvent
 
-"""
-1. (Client) User inputs the course and date on the form.
-2. (Server) Check cache for the course and date.
-    2.1. If the cache hits, use the Schedule objects stored.
-    2.2. If the cache misses, use the scraper to retrieve the Schedule objects.
-3. (Server) Upon loading the schedule, send the user, shifts, course names and ScheduleEvent objects.
-4. (Client) Chooses the shifts for each weekday and hits the download button.
-5. (Server) Upon receiving the request, check cache for the Schedule objects and generate the excel/image (depending
-   on user preferences).
-6. (Client) File is downloaded.  
-"""
-
 
 class Schedule:
 
@@ -152,3 +140,20 @@ class Schedule:
                 as_dict[weekday].append(asdict(event))
 
         return as_dict
+
+    def get_collisions(self, weekday: str) -> list[time]:
+
+        previous_event: Optional[ScheduleEvent] = None
+        collisions: list[time] = []
+
+        event: ScheduleEvent
+        for event in self.schedule[weekday]:
+
+            if previous_event and previous_event.starts_at.time() == event.starts_at.time():
+                collisions.append(event.starts_at.time())
+                previous_event = event
+
+            else:
+                previous_event = event
+
+        return collisions

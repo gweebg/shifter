@@ -28,6 +28,8 @@ MERGE_CELL: dict = {
 
 MERGE_FONT_SIZE: int = 9
 
+DARK_COLOR: str = "#595959"
+
 COLORS: list[str] = ["#ffffcc", "#ffcc99", "#ffcccc", "#ff99cc", "#ffccff",
                      "#cc99ff", "#ccccff", "#99ccff", "#ccffff", "#99ffcc",
                      "#ccffcc", "#ccff99"]
