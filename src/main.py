@@ -39,12 +39,21 @@ def main():
 
     shifts: dict[str, list[str]] = {
         "Aplicações e Serviços de Computação em Nuvem": ["T1", "PL3"],
-        "Métodos Formais em Engenharia de Software": ["T1", "TP1"],
+        "Métodos Formais em Engenharia de Software": ["T1", "TP1", "TP5", "TP4"],
         "Requisitos e Arquiteturas de Software": ["T1", "PL2", "PL1", "PL5"],
-        "Computação Paralela": ["PL6", "T1"],
+        "Computação Paralela": ["PL6", "T1", "PL4", "PL2"],
         "Engenharia de Serviços em Rede": ["PL2", "T1", "PL1"],
         "Dados e Aprendizagem Automática": ["T1", "PL5"]
     }
+
+    # shifts: dict[str, list[str]] = {
+    #     "Aplicações e Serviços de Computação em Nuvem": ["T1", "PL3"],
+    #     "Métodos Formais em Engenharia de Software": ["T1", "TP1", "TP5"],
+    #     "Requisitos e Arquiteturas de Software": ["T1", "PL2", "PL1"],
+    #     "Computação Paralela": ["PL6", "T1"],
+    #     "Engenharia de Serviços em Rede": ["PL2", "T1"],
+    #     "Dados e Aprendizagem Automática": ["T1", "PL5"]
+    # }
 
     xlsx_builder: XlsxBuilder = XlsxBuilder(schedule=schedule_obj.filter(shifts))
     xlsx_builder.build()

@@ -1,5 +1,6 @@
 from datetime import time, timedelta
 from io import BytesIO
+from typing import Optional
 
 import xlsxwriter as writer
 from xlsxwriter.format import Format
@@ -83,9 +84,23 @@ class XlsxBuilder:
         alphabet: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         return alphabet[alphabet.index(column_letter) + step % len(alphabet)]
 
+    @staticmethod
+    def get_in_between_columns(starting_columns: str, ending_column: str) -> list[str]:
+        alphabet: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+        result: list[str] = []
+        starting_index: int = alphabet.index(starting_columns)
+        ending_index: int = alphabet.index(ending_column)
+
+        i: int
+        for i in range(starting_index, ending_index + 1):
+            result.append(alphabet[i])
+
+        return result
+
     def layout_setup(self) -> None:
 
-        self.worksheet.set_column(0, 10, 23)
+        self.worksheet.set_column(0, 30, 23)
         self.worksheet.set_default_row(23)
         self.worksheet.set_row(0, 30)
 
@@ -132,18 +147,30 @@ class XlsxBuilder:
             )
 
     def build(self):  # -> bytes:
+        """
+        Builds the xlsx schedule based on the Schedule object provided.
 
-        self.layout_setup()
-        self.paint_rows()
+        :return: The schedule stored in memory as BytesIO.
+        """
 
+        self.layout_setup()  # Setup row and column heights and widths.
+        self.paint_rows()  # Setup base color layout for the schedule.
+
+        # Control variables for the placement of events on the worksheet.
         step: int = 0
         mapped_weekdays: dict[str, str] = self.get_weekday_mapper(self.schedule.weekdays, step)
+        mapped_weekdays_for_events: dict[str, list[str]] = dict.fromkeys(self.schedule.weekdays, list())
         mapped_hours: dict[str, int] = self.get_hours_mapper(self.time_data)
+
+        # Control variables for the colors of the events.
+        event_color_index: dict[str, str] = {}
+        color_index: int = 0
 
         weekday: str
         events: list[ScheduleEvent]
-        for weekday, events in self.schedule.schedule.items():
+        for weekday, events in self.schedule.schedule.items():  # Looping over every weekday and their events.
 
+            # Retrieving the event collisions for the current weekday.
             overlapping_times: list[time] = self.schedule.get_collisions(weekday)
             starting_column: str = mapped_weekdays[weekday]
 
@@ -156,13 +183,61 @@ class XlsxBuilder:
                     self.cell_styles["header_merge_style"]
                 )
 
+                # Storing the used columns by the current weekday in a dictionary.
+                mapped_weekdays_for_events[weekday] = self.get_in_between_columns(starting_column, ending_column)
+
             else:  # Else we simply write on the corresponding column.
                 self.worksheet.write(f"{starting_column}1", weekday, self.cell_styles["header_style"])
+                mapped_weekdays_for_events[weekday] = [starting_column]
+
+            # Indicates in which column from the mapped_weekdays_for_events dictionary to place the event.
+            overlap_index: int = 0
+            print(mapped_weekdays_for_events)
 
             event: ScheduleEvent
-            for event in events:
-                ...
+            for event in events:  # Looping over every weekday event.
 
+                # Getting the row based on the event starting time.
+                mapped_row: int = mapped_hours[event.starts_at.time().strftime("%H:%M")]
+
+                ############################## TODO | Refactor
+
+                # Coloring stuff.
+                if event.body.name not in event_color_index:
+                    event_color_index[event.body.name] = styles.COLORS[color_index]
+                    color_index += 1
+
+                merge_style = self.workbook.add_format(styles.MERGE_CELL)
+                merge_style.set_font_size(styles.MERGE_FONT_SIZE)
+                merge_style.set_font_name(styles.FONT)
+                merge_style.set_font_color(styles.FONT_COLOR)
+                merge_style.set_fg_color(event_color_index[event.body.name])
+
+                ##############################
+
+                to_draw_column: str = mapped_weekdays_for_events[weekday][0]
+                if event.starts_at.time() in overlapping_times:  # If the event is one that overlaps.
+                    to_draw_column = mapped_weekdays_for_events[weekday][overlap_index]
+                    overlap_index += 1
+
+                else:  # If it is a regular event.
+                    overlap_index = 0
+
+                if event.duration.hour == 2:
+                    self.worksheet.merge_range(
+                        f"{to_draw_column}{mapped_row}:{to_draw_column}{mapped_row + 3}",
+                        str(event.body),
+                        merge_style
+                    )
+
+                elif event.duration.hour == 1:
+                    self.worksheet.merge_range(
+                        f"{to_draw_column}{mapped_row}:{to_draw_column}{mapped_row + 1}",
+                        str(event.body),
+                        merge_style
+                    )
+
+            # Control for the column counting on weekdays with overlapping events.
             step += len(overlapping_times)
             mapped_weekdays = self.get_weekday_mapper(self.schedule.weekdays, step)
 

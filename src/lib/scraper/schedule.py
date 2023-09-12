@@ -141,6 +141,26 @@ class Schedule:
 
         return as_dict
 
+    @staticmethod
+    def _check_if_collides(main_event: ScheduleEvent, test_event: ScheduleEvent) -> bool:
+
+        if main_event.starts_at.time() == test_event.starts_at.time():
+            return True
+
+        main_event_delta: timedelta = timedelta(hours=main_event.starts_at.hour, minutes=main_event.starts_at.minute)
+        duration_delta: timedelta = timedelta(hours=main_event.duration.hour, minutes=main_event.duration.minute)
+
+        ending_timedelta: timedelta = main_event_delta + duration_delta
+        main_event_ends: time = time(
+            hour=ending_timedelta.seconds // 3600,
+            minute=(ending_timedelta.seconds // 60) % 60
+        )
+
+        if main_event.starts_at.time() < test_event.starts_at.time() < main_event_ends:
+            return True
+
+        return False
+
     def get_collisions(self, weekday: str) -> list[time]:
 
         previous_event: Optional[ScheduleEvent] = None
@@ -149,11 +169,16 @@ class Schedule:
         event: ScheduleEvent
         for event in self.schedule[weekday]:
 
-            if previous_event and previous_event.starts_at.time() == event.starts_at.time():
+            if previous_event and self._check_if_collides(previous_event, event):
+
+                if previous_event.starts_at.time() != event.starts_at.time():
+                    collisions.append(previous_event.starts_at.time())
+
                 collisions.append(event.starts_at.time())
                 previous_event = event
 
             else:
                 previous_event = event
 
+        print(weekday, collisions)
         return collisions
