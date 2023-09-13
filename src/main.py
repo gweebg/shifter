@@ -1,5 +1,6 @@
 from src.lib.builder.builder import Builder
 from src.lib.builder.ical.ical_builder import IcalBuilder
+from src.lib.builder.json.json_builder import JsonBuilder
 from src.lib.builder.xlsx.xlsx_builder import XlsxBuilder
 from src.lib.scraper.parser import ScheduleParser
 from src.lib.scraper.schedule import Schedule
@@ -30,8 +31,9 @@ def main():
     }
 
     # builder: Builder = XlsxBuilder(schedule=schedule_obj.filter(shifts))
-    builder: Builder = IcalBuilder(schedule=schedule_obj.filter(shifts))
-    builder.build()
+    # builder: Builder = IcalBuilder(schedule=schedule_obj.filter(shifts))
+    builder: Builder = JsonBuilder(schedule=schedule_obj.filter(shifts))
+    print(builder.build().decode())
 
 
 if __name__ == '__main__':
