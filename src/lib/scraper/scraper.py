@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webelement import WebElement
 
-import src.lib.elements as elements
+import src.lib.scraper.elements as elements
 from src.lib.exceptions import YearOutOfBoundsException, CourseNameDoesNotExistException
 from src.lib.scraper.parser import ScheduleParser
 from src.lib.scraper.schedule import Schedule
