@@ -146,6 +146,17 @@ class XlsxBuilder:
                 cell_format=self.cell_styles["dark_color"] if i % 2 == 0 else self.cell_styles["light_color"]
             )
 
+    @staticmethod
+    def is_event_overlapping(event_time: time, overlapping_hours: list[time | tuple[time, ...]]) -> bool:
+
+        hour: time | tuple[time, ...]
+        for hour in overlapping_hours:
+
+            if (hour == event_time) or (isinstance(hour, tuple) and event_time in hour):
+                return True
+
+        return False
+
     def build(self):  # -> bytes:
         """
         Builds the xlsx schedule based on the Schedule object provided.
@@ -192,7 +203,6 @@ class XlsxBuilder:
 
             # Indicates in which column from the mapped_weekdays_for_events dictionary to place the event.
             overlap_index: int = 0
-            print(mapped_weekdays_for_events)
 
             event: ScheduleEvent
             for event in events:  # Looping over every weekday event.
@@ -216,7 +226,8 @@ class XlsxBuilder:
                 ##############################
 
                 to_draw_column: str = mapped_weekdays_for_events[weekday][0]
-                if event.starts_at.time() in overlapping_times:  # If the event is one that overlaps.
+                if self.is_event_overlapping(event.starts_at.time(), overlapping_times):  # If the event overlaps.
+                    print(mapped_weekdays_for_events, weekday, overlap_index)
                     to_draw_column = mapped_weekdays_for_events[weekday][overlap_index]
                     overlap_index += 1
 

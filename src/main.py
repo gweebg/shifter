@@ -25,7 +25,7 @@ from src.lib.scraper.scraper import ScheduleScraper
 
 def main():
     parser: ScheduleParser = ScheduleParser()
-    scraper: ScheduleScraper = ScheduleScraper(is_headless=True)
+    scraper: ScheduleScraper = ScheduleScraper(is_headless=False)
 
     schedule = scraper.get(
         course_name="Mestrado em Engenharia Informática",
@@ -39,7 +39,7 @@ def main():
 
     shifts: dict[str, list[str]] = {
         "Aplicações e Serviços de Computação em Nuvem": ["T1", "PL3"],
-        "Métodos Formais em Engenharia de Software": ["T1", "TP1", "TP5", "TP4"],
+        "Métodos Formais em Engenharia de Software": ["T1", "TP1", "TP5"],
         "Requisitos e Arquiteturas de Software": ["T1", "PL2", "PL1", "PL5"],
         "Computação Paralela": ["PL6", "T1", "PL4", "PL2"],
         "Engenharia de Serviços em Rede": ["PL2", "T1", "PL1"],
@@ -48,8 +48,8 @@ def main():
 
     # shifts: dict[str, list[str]] = {
     #     "Aplicações e Serviços de Computação em Nuvem": ["T1", "PL3"],
-    #     "Métodos Formais em Engenharia de Software": ["T1", "TP1", "TP5"],
-    #     "Requisitos e Arquiteturas de Software": ["T1", "PL2", "PL1"],
+    #     "Métodos Formais em Engenharia de Software": ["T1", "TP1"],
+    #     "Requisitos e Arquiteturas de Software": ["T1", "PL2"],
     #     "Computação Paralela": ["PL6", "T1"],
     #     "Engenharia de Serviços em Rede": ["PL2", "T1"],
     #     "Dados e Aprendizagem Automática": ["T1", "PL5"]

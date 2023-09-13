@@ -161,24 +161,26 @@ class Schedule:
 
         return False
 
-    def get_collisions(self, weekday: str) -> list[time]:
+    def get_collisions(self, weekday: str) -> list[time | tuple[time, ...]]:
 
         previous_event: Optional[ScheduleEvent] = None
-        collisions: list[time] = []
+        collisions: list[time | tuple[time, ...]] = []
 
         event: ScheduleEvent
         for event in self.schedule[weekday]:
 
             if previous_event and self._check_if_collides(previous_event, event):
 
+                # In the case of the overlapping events starting time doesn't match, we aggregate them in a tuple.
                 if previous_event.starts_at.time() != event.starts_at.time():
-                    collisions.append(previous_event.starts_at.time())
+                    collisions.append((previous_event.starts_at.time(), event.starts_at.time()))
 
-                collisions.append(event.starts_at.time())
+                else:  # Else we just append the hour.
+                    collisions.append(event.starts_at.time())
+
                 previous_event = event
 
             else:
                 previous_event = event
 
-        print(weekday, collisions)
         return collisions
