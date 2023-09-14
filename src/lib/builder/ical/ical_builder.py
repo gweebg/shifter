@@ -86,4 +86,7 @@ class IcalBuilder(Builder):
         for event in events:
             calendar.add_component(self._to_ical_event(event))
 
+        # file = open("debug.ics", "wb")
+        # file.write(calendar.to_ical())
+
         return calendar.to_ical()

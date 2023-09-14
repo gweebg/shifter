@@ -36,12 +36,12 @@ class XlsxBuilder(Builder):
 
         self.debug: bool = debug
 
-        self._time_data: list[str] = self._generate_time_intervals(*(schedule.get_starting_and_ending_time()))
-        self._result: BytesIO = BytesIO()
-        self._workbook: Workbook = Workbook(self._result) if not debug else Workbook("debug.xlsx")
-        self._worksheet: Worksheet = self._workbook.add_worksheet("Your Schedule")
+        self.__time_data: list[str] = self._generate_time_intervals(*(schedule.get_starting_and_ending_time()))
+        self.__result: BytesIO = BytesIO()
+        self.__workbook: Workbook = Workbook(self.__result) if not debug else Workbook("debug.xlsx")
+        self.__worksheet: Worksheet = self.__workbook.add_worksheet("Your Schedule")
 
-        self._cell_styles: dict[str, Format] = {}
+        self.__cell_styles: dict[str, Format] = {}
 
     @staticmethod
     def _generate_time_intervals(starting_time: time, ending_time: time) -> list[str]:
@@ -176,35 +176,35 @@ class XlsxBuilder(Builder):
         """
 
         # Column/Row count, width and heights.
-        self._worksheet.set_column(0, 30, 23)
-        self._worksheet.set_default_row(23)
-        self._worksheet.set_row(0, 30)
+        self.__worksheet.set_column(0, 30, 23)
+        self.__worksheet.set_default_row(23)
+        self.__worksheet.set_row(0, 30)
 
         # Cells used on the header of the schedule.
-        header_style = self._workbook.add_format(styles.HEADER_CELL)
+        header_style = self.__workbook.add_format(styles.HEADER_CELL)
         header_style.set_font_name(styles.FONT)
         header_style.set_font_color("white")
-        self._cell_styles["header_style"] = header_style
+        self.__cell_styles["header_style"] = header_style
 
         # Dark cell style for better visibility.
-        dark_color = self._workbook.add_format(styles.DARK_COLOR_CELL)
+        dark_color = self.__workbook.add_format(styles.DARK_COLOR_CELL)
         dark_color.set_font_name(styles.FONT)
         dark_color.set_font_color(styles.FONT_COLOR)
-        self._cell_styles["dark_color"] = dark_color
+        self.__cell_styles["dark_color"] = dark_color
 
         # Light cell style for better visibility.
-        light_color = self._workbook.add_format(styles.LIGHT_COLOR_CELL)
+        light_color = self.__workbook.add_format(styles.LIGHT_COLOR_CELL)
         light_color.set_font_name(styles.FONT)
         light_color.set_font_color(styles.FONT_COLOR)
-        self._cell_styles["light_color"] = light_color
+        self.__cell_styles["light_color"] = light_color
 
         # Cells used on the header when merging is needed.
-        header_merge_style = self._workbook.add_format(styles.MERGE_CELL)
+        header_merge_style = self.__workbook.add_format(styles.MERGE_CELL)
         header_merge_style.set_font_size(styles.MERGE_FONT_SIZE)
         header_merge_style.set_font_name(styles.FONT)
         header_merge_style.set_font_color("white")
         header_merge_style.set_bg_color(styles.DARK_COLOR)
-        self._cell_styles["header_merge_style"] = header_merge_style
+        self.__cell_styles["header_merge_style"] = header_merge_style
 
     def setup_rows(self) -> None:
         """
@@ -221,11 +221,11 @@ class XlsxBuilder(Builder):
             else:
                 column_counter += overlap_count + 1
 
-        for i in range(2, len(self._time_data) + 2):
-            self._worksheet.write_row(
+        for i in range(2, len(self.__time_data) + 2):
+            self.__worksheet.write_row(
                 f"A{i}:F{i}",
-                data=[self._time_data[i - 2]] + [""] * column_counter,
-                cell_format=self._cell_styles["dark_color"] if i % 2 == 0 else self._cell_styles["light_color"]
+                data=[self.__time_data[i - 2]] + [""] * column_counter,
+                cell_format=self.__cell_styles["dark_color"] if i % 2 == 0 else self.__cell_styles["light_color"]
             )
 
     def build(self) -> Optional[bytes]:
@@ -243,7 +243,7 @@ class XlsxBuilder(Builder):
         step: int = 0
         mapped_weekdays: dict[str, str] = self._get_weekday_mapper(self.schedule.weekdays, step)
         mapped_weekdays_for_events: dict[str, list[str]] = dict.fromkeys(self.schedule.weekdays, list())
-        mapped_hours: dict[str, int] = self._get_hours_mapper(self._time_data)
+        mapped_hours: dict[str, int] = self._get_hours_mapper(self.__time_data)
 
         # Control variables for the colors of the events.
         event_color_index: dict[str, str] = {}
@@ -260,17 +260,17 @@ class XlsxBuilder(Builder):
             if overlapping_times:  # If there are overlapping events, we expand the column by the number of events.
 
                 ending_column: str = self._next_column(starting_column, step=len(overlapping_times))
-                self._worksheet.merge_range(
+                self.__worksheet.merge_range(
                     f"{starting_column}1:{ending_column}1",
                     weekday,
-                    self._cell_styles["header_merge_style"]
+                    self.__cell_styles["header_merge_style"]
                 )
 
                 # Storing the used columns by the current weekday in a dictionary.
                 mapped_weekdays_for_events[weekday] = self._get_in_between_columns(starting_column, ending_column)
 
             else:  # Else we simply write on the corresponding column.
-                self._worksheet.write(f"{starting_column}1", weekday, self._cell_styles["header_style"])
+                self.__worksheet.write(f"{starting_column}1", weekday, self.__cell_styles["header_style"])
                 mapped_weekdays_for_events[weekday] = [starting_column]
 
             # Indicates in which column from the mapped_weekdays_for_events dictionary to place the event.
@@ -289,7 +289,7 @@ class XlsxBuilder(Builder):
                     event_color_index[event.body.name] = styles.COLORS[color_index]
                     color_index += 1
 
-                merge_style = self._workbook.add_format(styles.MERGE_CELL)
+                merge_style = self.__workbook.add_format(styles.MERGE_CELL)
                 merge_style.set_font_size(styles.MERGE_FONT_SIZE)
                 merge_style.set_font_name(styles.FONT)
                 merge_style.set_font_color(styles.FONT_COLOR)
@@ -304,14 +304,14 @@ class XlsxBuilder(Builder):
                     overlap_index = 0
 
                 if event.duration.hour == 2:
-                    self._worksheet.merge_range(
+                    self.__worksheet.merge_range(
                         f"{to_draw_column}{mapped_row}:{to_draw_column}{mapped_row + 3}",
                         str(event.body),
                         merge_style
                     )
 
                 elif event.duration.hour == 1:
-                    self._worksheet.merge_range(
+                    self.__worksheet.merge_range(
                         f"{to_draw_column}{mapped_row}:{to_draw_column}{mapped_row + 1}",
                         str(event.body),
                         merge_style
@@ -321,6 +321,6 @@ class XlsxBuilder(Builder):
             step += len(overlapping_times)
             mapped_weekdays = self._get_weekday_mapper(self.schedule.weekdays, step)
 
-        self._workbook.close()
+        self.__workbook.close()
 
-        return self._result.getvalue() if self.debug else None
+        return self.__result.getvalue() if self.debug else None
