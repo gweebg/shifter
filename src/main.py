@@ -20,9 +20,11 @@ def main():
         course_name=course_name,
         year=1,
         formatted=True,
-        date_str=SECOND_SEMESTER_DATE,
+        date_str=FIRST_SEMESTER_DATE,
         parser=parser,
     )
+
+    scraper.close()
 
     schedule_obj: Schedule = schedule["Mestrado em Engenharia Informática"][1]
 

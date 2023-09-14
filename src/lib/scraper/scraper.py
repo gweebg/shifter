@@ -29,6 +29,7 @@ class ScheduleScraper:
         """
 
         self.__url: str = "https://alunos.uminho.pt/pt/estudantes/paginas/infouteishorarios.aspx"
+        self.__fetched: bool = False
         self.options: FirefoxOptions = FirefoxOptions()
 
         if is_headless:
@@ -42,6 +43,10 @@ class ScheduleScraper:
         :return: List containing the name of every course.
         :rtype: list[str]
         """
+
+        if not self.__fetched:
+            self.driver.get(self.__url)
+            self.__fetched = True
 
         courses: list[WebElement] = self.driver.find_elements(by=By.CLASS_NAME, value="rcbItem")
         return list(map(lambda item: item.get_property("innerText"), courses))
@@ -126,6 +131,7 @@ class ScheduleScraper:
         """
 
         self.driver.get(self.__url)  # Getting the page.
+        self.__fetched = True
 
         if course_name not in self.get_courses():  # Throwing an error if the course name doesn't exist.
             raise CourseNameDoesNotExistException(f"Course '{course_name}' does not exist.")
@@ -157,7 +163,9 @@ class ScheduleScraper:
             content: str = self._get_single(date_str=date_str, year=year, formatted=formatted, parser=parser)
             result[course_name][year] = content
 
+        return result
+
+    def close(self) -> None:
         self.driver.close()
         self.driver.quit()
 
-        return result
