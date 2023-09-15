@@ -8,6 +8,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webelement import WebElement
 
 import src.lib.scraper.elements as elements
+from src.lib.cache.ttl_cache import Cache
 from src.lib.exceptions import YearOutOfBoundsException, CourseNameDoesNotExistException
 from src.lib.scraper.parser import ScheduleParser
 from src.lib.scraper.schedule import Schedule, ScheduleGroup
@@ -96,6 +97,7 @@ class ScheduleScraper:
             raise YearOutOfBoundsException(f"The course doesn't have an year {year}.")
 
         finally:  # Go to the previous page in case we want to scrape any more years.
+            self.driver.back()
             self.driver.back()
 
         if formatted:  # If we want the result as a Schedule object.

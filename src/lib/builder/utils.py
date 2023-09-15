@@ -5,7 +5,7 @@ from src.lib.scraper.schedule import Schedule
 
 
 def merge_schedules(schedules: list[Schedule]) -> Schedule:
-    weekdays: list[str] = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"]
+    weekdays: list[str] = ["Segunda-Feira", "Terça-Feira", "Quarta-Feira", "Quinta-Feira", "Sexta-Feira", "Sábado"]
 
     final_schedule: Schedule = Schedule(weekdays=weekdays)
 

@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -28,6 +29,10 @@ class ScheduleRequest(BaseModel):
         :rtype: str
         """
         return SemesterDates.from_key(self.course_semester).value  # Date corresponding to the semester.
+
+    @property
+    def actual_year(self) -> Optional[int]:
+        return None if self.course_years == 0 else self.course_years  # Normalize the course year.
 
     @cached_property
     def cache_key(self) -> str:

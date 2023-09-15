@@ -34,9 +34,10 @@ class XlsxBuilder(Builder):
 
         super().__init__(schedule)
 
+        self.content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         self.debug: bool = debug
 
-        self.__time_data: list[str] = self._generate_time_intervals(*(schedule.get_starting_and_ending_time()))
+        self.__time_data: list[str] = self._generate_time_intervals(*(self.schedule.get_starting_and_ending_time()))
         self.__result: BytesIO = BytesIO()
         self.__workbook: Workbook = Workbook(self.__result) if not debug else Workbook("debug.xlsx")
         self.__worksheet: Worksheet = self.__workbook.add_worksheet("Your Schedule")
@@ -323,4 +324,4 @@ class XlsxBuilder(Builder):
 
         self.__workbook.close()
 
-        return self.__result.getvalue() if self.debug else None
+        return self.__result.getvalue() if not self.debug else None

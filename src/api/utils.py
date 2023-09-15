@@ -8,3 +8,5 @@ class SemesterDates(Enum):
     @classmethod
     def from_key(cls, key: int) -> "SemesterDates":
         return [date for date in SemesterDates][key - 1]
+
+

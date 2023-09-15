@@ -22,6 +22,7 @@ class JsonBuilder(Builder):
         Class constructor.
         """
         super().__init__(schedule)
+        self.content_type = "application/json"
 
     @staticmethod
     def _serialize_unknown_obj(obj: Any) -> str:

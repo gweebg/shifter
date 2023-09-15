@@ -26,6 +26,7 @@ class IcalBuilder(Builder):
 
         super().__init__(schedule)
 
+        self.content_type = "text/calendar"
         self._weekday_abbr_map: dict[str, str] = {
             "Segunda-Feira": "MO",
             "Terça-Feira": "TU",

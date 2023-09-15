@@ -16,14 +16,17 @@ class Builder(ABC):
     @abstractmethod
     def __init__(self, schedule: Schedule | list[Schedule], *args, **kwargs):
 
+        self.content_type: str = ""
+
         if isinstance(schedule, list):
+            print("Merged")
             self.schedule: Schedule = merge_schedules(schedule)
 
         else:
             self.schedule: Schedule = schedule
 
     @abstractmethod
-    def build(self, *args, **kwargs):
+    def build(self):
         ...
 
 
