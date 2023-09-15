@@ -169,3 +169,6 @@ async def convert_schedule(request: ConvertRequest):
     response.headers["Content-Disposition"] = f'attachment; filename="schedule.{str(request.fmt.value)}"'  # Filename.
 
     return response
+
+
+router.add_event_handler("shutdown", lambda: scraper.close())

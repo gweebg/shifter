@@ -172,6 +172,5 @@ class ScheduleScraper:
         return result
 
     def close(self) -> None:
-        self.driver.close()
         self.driver.quit()
 
