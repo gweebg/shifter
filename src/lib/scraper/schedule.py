@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from datetime import time, timedelta
 from typing import Optional
 
@@ -261,3 +261,26 @@ class Schedule:
             previous_event = event
 
         return collisions
+
+
+class ScheduleGroup:
+
+    def __init__(self, course_name: str) -> None:
+
+        self.course_name = course_name
+        self.years: dict[int, Schedule] = {}
+
+    @property
+    def shifts(self) -> dict[int, dict[str, list[str]]]:
+        return {year: self.years[year].get_shifts_from_courses() for year in self.years}
+
+    def add_event_to_year(self, year: int, event: Schedule) -> None:
+        self.years[year] = event
+
+    def as_dict(self) -> dict:
+        return {year: self.years[year].get_as_dict() for year in self.years}
+
+
+
+
+

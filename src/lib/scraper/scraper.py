@@ -10,7 +10,7 @@ from selenium.webdriver.remote.webelement import WebElement
 import src.lib.scraper.elements as elements
 from src.lib.exceptions import YearOutOfBoundsException, CourseNameDoesNotExistException
 from src.lib.scraper.parser import ScheduleParser
-from src.lib.scraper.schedule import Schedule
+from src.lib.scraper.schedule import Schedule, ScheduleGroup
 
 
 class ScheduleScraper:
@@ -110,7 +110,7 @@ class ScheduleScraper:
         return page_content
 
     def get(self, course_name: str, parser: ScheduleParser, date_str: Optional[str] = None, year: Optional[int] = None,
-            formatted: bool = True) -> Optional[dict]:
+            formatted: bool = True) -> Optional[ScheduleGroup]:
         """
         This method is the main method of this class, it handles the fetching, scraping and parsing of the schedule
         based on the given parameters.
@@ -125,9 +125,9 @@ class ScheduleScraper:
         :type year: int
         :param formatted: Indicates whether we want the result as a raw html string or formatted as a Schedule.
         :type formatted: bool
-        :return: The dictionary containing all the scraped content if everything went well, None if the schedule doesn't
-            exist.
-        :rtype: Optional[dict]
+        :return: ScheduleGroup object containing all the scraped content if everything went well, None if the schedule
+            doesn't exist.
+        :rtype: Optional[ScheduleGroup]
         """
 
         self.driver.get(self.__url)  # Getting the page.
@@ -136,7 +136,7 @@ class ScheduleScraper:
         if course_name not in self.get_courses():  # Throwing an error if the course name doesn't exist.
             raise CourseNameDoesNotExistException(f"Course '{course_name}' does not exist.")
 
-        result: dict = {course_name: {}}
+        result: ScheduleGroup = ScheduleGroup(course_name=course_name)
 
         if not date_str:  # If no date is specified we use the today's date.
             date_str: str = date.today().strftime("%d-%m-%Y")  # Current date.
@@ -154,14 +154,18 @@ class ScheduleScraper:
                     if content is None:  # If content is None then we abort since there are no schedule for the provided date.
                         return None
 
-                    result[course_name][y] = content
+                    result.add_event_to_year(y, content)
 
                 except YearOutOfBoundsException:
                     break  # Stop iterating once there are no more years parsable.
 
         else:  # If the year is specified, then we get only that year.
-            content: str = self._get_single(date_str=date_str, year=year, formatted=formatted, parser=parser)
-            result[course_name][year] = content
+            content: Optional[str | Schedule] = self._get_single(date_str=date_str, year=year, formatted=formatted, parser=parser)
+
+            if content is None:
+                return None
+
+            result.add_event_to_year(year, content)
 
         return result
 
