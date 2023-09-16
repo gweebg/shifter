@@ -13,13 +13,17 @@ class Builder(ABC):
     :type schedule: Schedule | list[Schedule]
     """
 
+    __slots__ = (
+        'schedule',
+        'content_type'
+    )
+
     @abstractmethod
     def __init__(self, schedule: Schedule | list[Schedule], *args, **kwargs):
 
         self.content_type: str = ""
 
         if isinstance(schedule, list):
-            print("Merged")
             self.schedule: Schedule = merge_schedules(schedule)
 
         else:

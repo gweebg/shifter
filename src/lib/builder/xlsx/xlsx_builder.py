@@ -27,6 +27,12 @@ class XlsxBuilder(Builder):
 
     """
 
+    __slots__ = (
+        'schedule',
+        'content_type',
+        'debug'
+    )
+
     def __init__(self, schedule: Schedule | list[Schedule], debug: bool = False) -> None:
         """
         Constructor method for the xlsx builder.

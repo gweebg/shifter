@@ -10,6 +10,11 @@ class Schedule:
     This class represents a schedule composed of an amount of weekdays and their respective events.
     """
 
+    __slots__ = (
+        'weekdays',
+        'schedule'
+    )
+
     def __init__(self, weekdays: list[str]) -> None:
         """
         Schedule class constructor.

@@ -19,6 +19,11 @@ class IcalBuilder(Builder):
     :type schedule: Schedule | list[Schedule]
     """
 
+    __slots__ = (
+        'schedule',
+        'content_type'
+    )
+
     def __init__(self, schedule: Schedule | list[Schedule]):
         """
         Constructor method for the xlsx builder.

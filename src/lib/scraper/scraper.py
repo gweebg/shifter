@@ -24,6 +24,7 @@ class ScheduleScraper:
     :param is_headless: This boolean is used for debugging, and runs selenium in a non-headless mode.
     :type is_headless: bool
     """
+
     def __init__(self, is_headless: bool = True) -> None:
         """
         Class constructor.

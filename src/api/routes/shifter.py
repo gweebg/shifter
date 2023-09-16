@@ -41,6 +41,10 @@ def cached_get(
         scraper_obj: ScheduleScraper,
         parser_obj: ScheduleParser) -> Optional[ScheduleGroup]:
     schedules: Optional[ScheduleGroup]
+    """
+    This auxiliary function requests a schedule from the cache and from the web if not present in cache.
+    TODO: Turn this into a decorator over another function that runs on the endpoints.    
+    """
 
     if cache_obj.has(key=body.cache_key):  # If value is already cached we use it.
         schedules = cache_obj.get(key=body.cache_key)
@@ -172,3 +176,4 @@ async def convert_schedule(request: ConvertRequest):
 
 
 router.add_event_handler("shutdown", lambda: scraper.close())
+
