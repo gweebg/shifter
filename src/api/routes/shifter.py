@@ -90,6 +90,8 @@ async def fetch_schedule(body: ScheduleRequest) -> ScheduleResponse:
     :type body: ScheduleRequest
     """
 
+    body.course_name = body.course_name.strip()
+
     try:
 
         schedules: Optional[ScheduleGroup] = cached_get(
@@ -101,14 +103,14 @@ async def fetch_schedule(body: ScheduleRequest) -> ScheduleResponse:
 
         if schedules is None:  # No schedule was found for the given date.
             raise HTTPException(status_code=404,
-                                detail=f"No schedule found for {body.course_name} at {body.course_date}")
+                                detail=f"No schedule found for '{body.course_name}' at '{body.course_date}'.")
 
     except YearOutOfBoundsException:  # The provided course_year does not exist for the specified course.
         raise HTTPException(status_code=400,
-                            detail=f"The course {body.course_name} doesn't have an year {body.course_year}")
+                            detail=f"The course '{body.course_name}' doesn't have an year '{body.course_year}'.")
 
     except CourseNameDoesNotExistException:  # Somehow the course name doesn't exist.
-        raise HTTPException(status_code=404, detail=f"The course {body.course_name} does not exist")
+        raise HTTPException(status_code=404, detail=f"The course '{body.course_name}' does not exist.")
 
     # Building final response if everything went ok.
     response: ScheduleResponse = ScheduleResponse(
@@ -143,14 +145,14 @@ async def convert_schedule(request: ConvertRequest):
 
         if schedules is None:  # No schedule was found for the given date.
             raise HTTPException(status_code=404,
-                                detail=f"No schedule found for {request.body.course_name} at {request.course_date}")
+                                detail=f"No schedule found for '{request.body.course_name}' at '{request.course_date}'.")
 
     except YearOutOfBoundsException:  # The provided course_year does not exist for the specified course.
         raise HTTPException(status_code=400,
-                            detail=f"The course {request.body.course_name} doesn't have an year {request.body.course_year}")
+                            detail=f"The course '{request.body.course_name}' doesn't have an year '{request.body.course_year}'.")
 
     except CourseNameDoesNotExistException:  # Somehow the course name doesn't exist.
-        raise HTTPException(status_code=404, detail=f"The course {request.body.course_name} does not exist")
+        raise HTTPException(status_code=404, detail=f"The course '{request.body.course_name}' does not exist.")
 
     # Filtering the schedules by the provided shifts.
     used_schedules: list[Schedule] = []

@@ -21,7 +21,6 @@ class NotSet:
 
 
 class Cache:
-
     """
     This class represent an in-disk ttl caching system using SQLite3.
 
@@ -31,6 +30,8 @@ class Cache:
     :type ttl: int
     :param save_on_exit: Enable of disable on exit saving (committing). True by default.
     :type save_on_exit: bool
+
+    # TODO: Use SQLAlchemy to async database.
     """
 
     # Limiting the set of attributes of this class (better performance).

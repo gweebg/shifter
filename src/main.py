@@ -13,31 +13,30 @@ SECOND_SEMESTER_DATE: str = "01-03-2024"
 
 def main():
     parser: ScheduleParser = ScheduleParser()
-    scraper: ScheduleScraper = ScheduleScraper(is_headless=False)
+    scraper: ScheduleScraper = ScheduleScraper(is_headless=True)
 
-    course_name: str = "Licenciatura em Engenharia Informática"
+    course_name: str = "Mestrado em Engenharia Informática"
     schedule: ScheduleGroup = scraper.get(
         course_name=course_name,
         formatted=True,
+        year=1,
         date_str=FIRST_SEMESTER_DATE,
         parser=parser,
     )
 
     scraper.close()
 
-    for year, sched in schedule.years.items():
-        print(year, sched.get_as_dict(), "\n\n")
+    schedule_obj: Schedule = schedule.years[1]
+    shifts: dict[str, list[str]] = {
+        "Aplicações e Serviços de Computação em Nuvem": ["T1", "PL6"],
+        "Métodos Formais em Engenharia de Software": ["T1", "TP4"],
+        "Requisitos e Arquiteturas de Software": ["T1", "PL1"],
+        "Computação Paralela": ["PL5", "T1"],
+        "Engenharia de Serviços em Rede": ["PL3", "T1"],
+        "Dados e Aprendizagem Automática": ["T1", "PL4"]
+    }
 
-    # schedule_obj: Schedule = schedule["Mestrado em Engenharia Informática"][1]
-    #
-    # shifts: dict[str, list[str]] = {
-    #     "Aplicações e Serviços de Computação em Nuvem": ["T1", "PL3"],
-    #     "Métodos Formais em Engenharia de Software": ["T1", "TP1", "TP5"],
-    #     "Requisitos e Arquiteturas de Software": ["T1", "PL2", "PL1", "PL5"],
-    #     "Computação Paralela": ["PL6", "T1", "PL4", "PL2"],
-    #     "Engenharia de Serviços em Rede": ["PL2", "T1", "PL1"],
-    #     "Dados e Aprendizagem Automática": ["T1", "PL5"]
-    # }
+    print(schedule_obj)
 
     # builder: Builder = XlsxBuilder(schedule=schedule_obj.filter(shifts), debug=True)
     # builder: Builder = IcalBuilder(schedule=schedule_obj.filter(shifts))

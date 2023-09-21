@@ -16,7 +16,7 @@ from src.lib.scraper.schedule import Schedule, ScheduleGroup
 
 class ScheduleScraper:
     """
-    TODO: Catch connection errors for graceful shutdown.
+    TODO: Catch connection errors for graceful shutdown, replace selenium with Playwright for async scraping..
 
     This class is responsible for scraping the web for the desired schedules that are specified by a name,
     a date string and the school years to get.
