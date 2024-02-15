@@ -27,19 +27,27 @@ class XlsxBuilder(Builder):
 
     """
 
-    def __init__(self, schedule: Schedule | list[Schedule], debug: bool = False) -> None:
+    def __init__(
+        self, schedule: Schedule | list[Schedule], debug: bool = False
+    ) -> None:
         """
         Constructor method for the xlsx builder.
         """
 
         super().__init__(schedule)
 
-        self.content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        self.content_type = (
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
         self.debug: bool = debug
 
-        self.__time_data: list[str] = self._generate_time_intervals(*(self.schedule.get_starting_and_ending_time()))
+        self.__time_data: list[str] = self._generate_time_intervals(
+            *(self.schedule.get_starting_and_ending_time())
+        )
         self.__result: BytesIO = BytesIO()
-        self.__workbook: Workbook = Workbook(self.__result) if not debug else Workbook("debug.xlsx")
+        self.__workbook: Workbook = (
+            Workbook(self.__result) if not debug else Workbook("debug.xlsx")
+        )
         self.__worksheet: Worksheet = self.__workbook.add_worksheet("Your Schedule")
 
         self.__cell_styles: dict[str, Format] = {}
@@ -58,14 +66,20 @@ class XlsxBuilder(Builder):
         time_list: list[str] = []
 
         interval: timedelta = timedelta(minutes=30)
-        starting_time_delta: timedelta = timedelta(hours=starting_time.hour, minutes=starting_time.minute)
-        ending_time_delta: timedelta = timedelta(hours=ending_time.hour, minutes=ending_time.minute)
+        starting_time_delta: timedelta = timedelta(
+            hours=starting_time.hour, minutes=starting_time.minute
+        )
+        ending_time_delta: timedelta = timedelta(
+            hours=ending_time.hour, minutes=ending_time.minute
+        )
 
         current_time_delta: timedelta = starting_time_delta
 
         while current_time_delta <= ending_time_delta:
-            current_time: time = time(hour=current_time_delta.seconds // 3600,
-                                      minute=(current_time_delta.seconds // 60) % 60)
+            current_time: time = time(
+                hour=current_time_delta.seconds // 3600,
+                minute=(current_time_delta.seconds // 60) % 60,
+            )
             time_list.append(current_time.strftime("%H:%M"))
 
             current_time_delta = current_time_delta + interval
@@ -151,7 +165,9 @@ class XlsxBuilder(Builder):
         return result
 
     @staticmethod
-    def _is_event_overlapping(event_time: time, overlapping_hours: list[time | tuple[time, time]]) -> bool:
+    def _is_event_overlapping(
+        event_time: time, overlapping_hours: list[time | tuple[time, time]]
+    ) -> bool:
         """
         Checks whether an event is overlapping with others.
         :param event_time: The event at which the event starts.
@@ -164,7 +180,6 @@ class XlsxBuilder(Builder):
 
         hour: time | tuple[time, ...]
         for hour in overlapping_hours:
-
             if (hour == event_time) or (isinstance(hour, tuple) and event_time in hour):
                 return True
 
@@ -215,7 +230,6 @@ class XlsxBuilder(Builder):
 
         column_counter: int = 0
         for weekday in self.schedule.schedule:
-
             overlap_count: int = len(self.schedule.get_collisions(weekday))
             if overlap_count == 0:
                 column_counter += 1
@@ -226,7 +240,9 @@ class XlsxBuilder(Builder):
             self.__worksheet.write_row(
                 f"A{i}:F{i}",
                 data=[self.__time_data[i - 2]] + [""] * column_counter,
-                cell_format=self.__cell_styles["dark_color"] if i % 2 == 0 else self.__cell_styles["light_color"]
+                cell_format=self.__cell_styles["dark_color"]
+                if i % 2 == 0
+                else self.__cell_styles["light_color"],
             )
 
     def build(self) -> Optional[bytes]:
@@ -242,8 +258,12 @@ class XlsxBuilder(Builder):
 
         # Control variables for the placement of events on the worksheet.
         step: int = 0
-        mapped_weekdays: dict[str, str] = self._get_weekday_mapper(self.schedule.weekdays, step)
-        mapped_weekdays_for_events: dict[str, list[str]] = dict.fromkeys(self.schedule.weekdays, list())
+        mapped_weekdays: dict[str, str] = self._get_weekday_mapper(
+            self.schedule.weekdays, step
+        )
+        mapped_weekdays_for_events: dict[str, list[str]] = dict.fromkeys(
+            self.schedule.weekdays, list()
+        )
         mapped_hours: dict[str, int] = self._get_hours_mapper(self.__time_data)
 
         # Control variables for the colors of the events.
@@ -252,26 +272,35 @@ class XlsxBuilder(Builder):
 
         weekday: str
         events: list[ScheduleEvent]
-        for weekday, events in self.schedule.schedule.items():  # Looping over every weekday and their events.
-
+        for (
+            weekday,
+            events,
+        ) in (
+            self.schedule.schedule.items()
+        ):  # Looping over every weekday and their events.
             # Retrieving the event collisions for the current weekday.
             overlapping_times: list[time] = self.schedule.get_collisions(weekday)
             starting_column: str = mapped_weekdays[weekday]
 
             if overlapping_times:  # If there are overlapping events, we expand the column by the number of events.
-
-                ending_column: str = self._next_column(starting_column, step=len(overlapping_times))
+                ending_column: str = self._next_column(
+                    starting_column, step=len(overlapping_times)
+                )
                 self.__worksheet.merge_range(
                     f"{starting_column}1:{ending_column}1",
                     weekday,
-                    self.__cell_styles["header_merge_style"]
+                    self.__cell_styles["header_merge_style"],
                 )
 
                 # Storing the used columns by the current weekday in a dictionary.
-                mapped_weekdays_for_events[weekday] = self._get_in_between_columns(starting_column, ending_column)
+                mapped_weekdays_for_events[weekday] = self._get_in_between_columns(
+                    starting_column, ending_column
+                )
 
             else:  # Else we simply write on the corresponding column.
-                self.__worksheet.write(f"{starting_column}1", weekday, self.__cell_styles["header_style"])
+                self.__worksheet.write(
+                    f"{starting_column}1", weekday, self.__cell_styles["header_style"]
+                )
                 mapped_weekdays_for_events[weekday] = [starting_column]
 
             # Indicates in which column from the mapped_weekdays_for_events dictionary to place the event.
@@ -279,7 +308,6 @@ class XlsxBuilder(Builder):
 
             event: ScheduleEvent
             for event in events:  # Looping over every weekday event.
-
                 # Getting the row based on the event starting time.
                 mapped_row: int = mapped_hours[event.starts_at.time().strftime("%H:%M")]
 
@@ -297,7 +325,9 @@ class XlsxBuilder(Builder):
                 merge_style.set_fg_color(event_color_index[event.body.name])
 
                 to_draw_column: str = mapped_weekdays_for_events[weekday][0]
-                if self._is_event_overlapping(event.starts_at.time(), overlapping_times):  # If the event overlaps.
+                if self._is_event_overlapping(
+                    event.starts_at.time(), overlapping_times
+                ):  # If the event overlaps.
                     to_draw_column = mapped_weekdays_for_events[weekday][overlap_index]
                     overlap_index += 1
 
@@ -308,14 +338,14 @@ class XlsxBuilder(Builder):
                     self.__worksheet.merge_range(
                         f"{to_draw_column}{mapped_row}:{to_draw_column}{mapped_row + 3}",
                         str(event.body),
-                        merge_style
+                        merge_style,
                     )
 
                 elif event.duration.hour == 1:
                     self.__worksheet.merge_range(
                         f"{to_draw_column}{mapped_row}:{to_draw_column}{mapped_row + 1}",
                         str(event.body),
-                        merge_style
+                        merge_style,
                     )
 
             # Control for the column counting on weekdays with overlapping events.

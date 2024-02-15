@@ -19,10 +19,7 @@ class IcalBuilder(Builder):
     :type schedule: Schedule | list[Schedule]
     """
 
-    __slots__ = (
-        'schedule',
-        'content_type'
-    )
+    __slots__ = ("schedule", "content_type", "_weekday_abbr_map")
 
     def __init__(self, schedule: Schedule | list[Schedule]):
         """
@@ -32,14 +29,14 @@ class IcalBuilder(Builder):
         super().__init__(schedule)
 
         self.content_type = "text/calendar"
-        self._weekday_abbr_map: dict[str, str] = {
+        self._weekday_abbr_map: dict[str] = {
             "Segunda-Feira": "MO",
             "Terça-Feira": "TU",
             "Quarta-Feira": "WE",
             "Quinta-Feira": "TH",
             "Sexta-Feira": "FR",
             "Sábado": "SA",
-            "Domingo": "SU"
+            "Domingo": "SU",
         }
 
     def _to_ical_event(self, event: ScheduleEvent) -> Event:
@@ -54,25 +51,36 @@ class IcalBuilder(Builder):
         result_event: Event = Event()
 
         starts_at: datetime = datetime(
-            2021, 7, 30,
-            hour=event.starts_at.hour, minute=event.starts_at.minute,
-            tzinfo=timezone("Europe/Lisbon")
+            2021,
+            7,
+            30,
+            hour=event.starts_at.hour,
+            minute=event.starts_at.minute,
+            tzinfo=timezone("Europe/Lisbon"),
         )
 
         ends_at_time: time = sum_to_time(event.starts_at.time(), event.duration.time())
         ends_at: datetime = datetime(
-            2021, 7, 30,
-            hour=ends_at_time.hour, minute=ends_at_time.minute,
-            tzinfo=timezone("Europe/Lisbon")
+            2021,
+            7,
+            30,
+            hour=ends_at_time.hour,
+            minute=ends_at_time.minute,
+            tzinfo=timezone("Europe/Lisbon"),
         )
 
-        result_event.add("summary", f"{event.body.shift} - {str(event.body.location)} - {get_abbr(event.body.name)}")
+        result_event.add(
+            "summary",
+            f"{event.body.shift} - {str(event.body.location)} - {get_abbr(event.body.name)}",
+        )
         result_event.add("description", str(event))
-        result_event.add('location', str(event.body.location))
-        result_event.add('dtstart', starts_at)
-        result_event.add('dtend', ends_at)
+        result_event.add("location", str(event.body.location))
+        result_event.add("dtstart", starts_at)
+        result_event.add("dtend", ends_at)
 
-        result_event.add('rrule', {'freq': 'weekly', 'byday': self._weekday_abbr_map[event.weekday]})
+        result_event.add(
+            "rrule", {"freq": "weekly", "byday": self._weekday_abbr_map[event.weekday]}
+        )
 
         return result_event
 
@@ -84,7 +92,7 @@ class IcalBuilder(Builder):
         :rtype: bytes
         """
         calendar: Calendar = Calendar()
-        calendar.add('name', "Shifter Schedule")
+        calendar.add("name", "Shifter Schedule")
 
         events: list[ScheduleEvent] = self.schedule.get_events()
 

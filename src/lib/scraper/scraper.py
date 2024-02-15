@@ -30,7 +30,9 @@ class ScheduleScraper:
         Class constructor.
         """
 
-        self.__url: str = "https://alunos.uminho.pt/pt/estudantes/paginas/infouteishorarios.aspx"
+        self.__url: str = (
+            "https://alunos.uminho.pt/pt/estudantes/paginas/infouteishorarios.aspx"
+        )
         self.__fetched: bool = False
         self.options: FirefoxOptions = FirefoxOptions()
 
@@ -50,11 +52,14 @@ class ScheduleScraper:
             self.driver.get(self.__url)
             self.__fetched = True
 
-        courses: list[WebElement] = self.driver.find_elements(by=By.CLASS_NAME, value="rcbItem")
+        courses: list[WebElement] = self.driver.find_elements(
+            by=By.CLASS_NAME, value="rcbItem"
+        )
         return list(map(lambda item: item.get_property("innerText"), courses))
 
-    def _get_single(self, year: int, date_str: str, formatted: bool, parser: ScheduleParser) -> Optional[
-        str | Schedule]:
+    def _get_single(
+        self, year: int, date_str: str, formatted: bool, parser: ScheduleParser
+    ) -> Optional[str | Schedule]:
         """
         This private method is responsible for getting an actual schedule and parsing it into a Schedule object if
         indicated.
@@ -72,7 +77,6 @@ class ScheduleScraper:
         """
 
         try:
-
             # Click on the button to get the page of schedule.
             search = self.driver.find_element(By.ID, elements.search_button)
             search.click()
@@ -82,7 +86,9 @@ class ScheduleScraper:
             year_input.click()
 
             # Select the date when the schedule came out.
-            date_input = self.driver.find_element(By.ID, elements.date_bar)  # Date format : dd-mm-YYYY
+            date_input = self.driver.find_element(
+                By.ID, elements.date_bar
+            )  # Date format : dd-mm-YYYY
             date_input.clear()
             date_input.send_keys(date_str)
 
@@ -94,7 +100,9 @@ class ScheduleScraper:
 
             page_content: str = self.driver.page_source
 
-        except NoSuchElementException:  # If the provided year does not exist then we can't scrape the page.
+        except (
+            NoSuchElementException
+        ):  # If the provided year does not exist then we can't scrape the page.
             raise YearOutOfBoundsException(f"The course doesn't have an year {year}.")
 
         finally:  # Go to the previous page in case we want to scrape any more years.
@@ -107,13 +115,21 @@ class ScheduleScraper:
                 parsed_content = parser.parse(page_content)
                 return parsed_content  # Return the parsed schedule.
 
-            except IndexError:  # If we can't parse the schedule scraped, then it doesn't exist yet.
+            except (
+                IndexError
+            ):  # If we can't parse the schedule scraped, then it doesn't exist yet.
                 return None
 
         return page_content
 
-    def get(self, course_name: str, parser: ScheduleParser, date_str: Optional[str] = None, year: Optional[int] = None,
-            formatted: bool = True) -> Optional[ScheduleGroup]:
+    def get(
+        self,
+        course_name: str,
+        parser: ScheduleParser,
+        date_str: Optional[str] = None,
+        year: Optional[int] = None,
+        formatted: bool = True,
+    ) -> Optional[ScheduleGroup]:
         """
         This method is the main method of this class, it handles the fetching, scraping and parsing of the schedule
         based on the given parameters.
@@ -136,8 +152,12 @@ class ScheduleScraper:
         self.driver.get(self.__url)  # Getting the page.
         self.__fetched = True
 
-        if course_name not in self.get_courses():  # Throwing an error if the course name doesn't exist.
-            raise CourseNameDoesNotExistException(f"Course '{course_name}' does not exist.")
+        if (
+            course_name not in self.get_courses()
+        ):  # Throwing an error if the course name doesn't exist.
+            raise CourseNameDoesNotExistException(
+                f"Course '{course_name}' does not exist."
+            )
 
         result: ScheduleGroup = ScheduleGroup(course_name=course_name)
 
@@ -150,11 +170,13 @@ class ScheduleScraper:
 
         if not year:  # If year is not specified we fetch every year possible.
             for y in range(1, 5):
-
                 try:  # Parsing the schedule for the current year (y).
-                    content: Optional[str | Schedule] = self._get_single(date_str=date_str, year=y, formatted=formatted,
-                                                                         parser=parser)
-                    if content is None:  # If content is None then we abort since there are no schedule for the provided date.
+                    content: Optional[str | Schedule] = self._get_single(
+                        date_str=date_str, year=y, formatted=formatted, parser=parser
+                    )
+                    if (
+                        content is None
+                    ):  # If content is None then we abort since there are no schedule for the provided date.
                         return None
 
                     result.add_event_to_year(y, content)
@@ -163,7 +185,9 @@ class ScheduleScraper:
                     break  # Stop iterating once there are no more years parsable.
 
         else:  # If the year is specified, then we get only that year.
-            content: Optional[str | Schedule] = self._get_single(date_str=date_str, year=year, formatted=formatted, parser=parser)
+            content: Optional[str | Schedule] = self._get_single(
+                date_str=date_str, year=year, formatted=formatted, parser=parser
+            )
 
             if content is None:
                 return None
@@ -174,4 +198,3 @@ class ScheduleScraper:
 
     def close(self) -> None:
         self.driver.quit()
-
