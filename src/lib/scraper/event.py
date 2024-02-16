@@ -14,6 +14,7 @@ class Location:
     :param room: Room where the event is taking place.
     :type room: str
     """
+
     building: str
     campus: str
     room: str
@@ -28,7 +29,9 @@ class Location:
         :rtype: Location
         """
         campus, building, room = tuple(string.replace(" ", "").split("-"))
-        return cls(building=building.replace("Edificio", "CP"), campus=campus, room=room)
+        return cls(
+            building=building.replace("Edificio", "CP"), campus=campus, room=room
+        )
 
     def __str__(self) -> str:
         """
@@ -48,6 +51,7 @@ class ScheduleBody:
     :param shift: Shift for the event.
     :type shift: str
     """
+
     name: str
     location: Location
     shift: str
@@ -66,7 +70,9 @@ class ScheduleBody:
 
         location_obj: Location = Location.from_string(location)
 
-        return cls(name=course_name.strip().lower(), location=location_obj, shift=shift.strip())
+        return cls(
+            name=course_name.strip().lower(), location=location_obj, shift=shift.strip()
+        )
 
     def __str__(self):
         """
@@ -88,13 +94,16 @@ class ScheduleEvent:
     :param weekday: Weekday of the event.
     :type weekday: str
     """
+
     body: ScheduleBody
     starts_at: datetime
     duration: datetime
     weekday: str
 
     @classmethod
-    def build(cls, body: str, starts_at: datetime, duration: datetime, weekday: str) -> "ScheduleEvent":
+    def build(
+        cls, body: str, starts_at: datetime, duration: datetime, weekday: str
+    ) -> "ScheduleEvent":
         """
         Given a string and some details (duration, starting time, weekday), this method builds an event.
         :param body: Event details as string.
@@ -112,7 +121,7 @@ class ScheduleEvent:
             body=ScheduleBody.from_string(body),
             starts_at=starts_at,
             duration=duration,
-            weekday=weekday
+            weekday=weekday,
         )
 
     def __str__(self):

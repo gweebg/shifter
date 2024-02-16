@@ -8,16 +8,13 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webelement import WebElement
 
 import src.lib.scraper.elements as elements
-from src.lib.cache.ttl_cache import Cache
-from src.lib.exceptions import YearOutOfBoundsException, CourseNameDoesNotExistException
+from src.lib.exceptions import CourseNameDoesNotExistException, YearOutOfBoundsException
 from src.lib.scraper.parser import ScheduleParser
 from src.lib.scraper.schedule import Schedule, ScheduleGroup
 
 
 class ScheduleScraper:
     """
-    TODO: Catch connection errors for graceful shutdown, replace selenium with Playwright for async scraping..
-
     This class is responsible for scraping the web for the desired schedules that are specified by a name,
     a date string and the school years to get.
 
@@ -26,10 +23,6 @@ class ScheduleScraper:
     """
 
     def __init__(self, is_headless: bool = True) -> None:
-        """
-        Class constructor.
-        """
-
         self.__url: str = (
             "https://alunos.uminho.pt/pt/estudantes/paginas/infouteishorarios.aspx"
         )
@@ -39,12 +32,12 @@ class ScheduleScraper:
         if is_headless:
             self.options.add_argument("--headless")
 
-        self.driver = webdriver.Firefox(options=self.options)  # Selenium driver set-up.
+        self.driver = webdriver.Firefox(options=self.options)  # webdriver set-up
 
     def get_courses(self) -> list[str]:
         """
-        Method that returns the list of every course on present on the scraped schedule list.
-        :return: List containing the name of every course.
+        Return a list of every available course on the schedules page.
+        :return: list of course names
         :rtype: list[str]
         """
 
@@ -57,7 +50,7 @@ class ScheduleScraper:
         )
         return list(map(lambda item: item.get_property("innerText"), courses))
 
-    def _get_single(
+    def get_single(
         self, year: int, date_str: str, formatted: bool, parser: ScheduleParser
     ) -> Optional[str | Schedule]:
         """
@@ -171,7 +164,7 @@ class ScheduleScraper:
         if not year:  # If year is not specified we fetch every year possible.
             for y in range(1, 5):
                 try:  # Parsing the schedule for the current year (y).
-                    content: Optional[str | Schedule] = self._get_single(
+                    content: Optional[str | Schedule] = self.get_single(
                         date_str=date_str, year=y, formatted=formatted, parser=parser
                     )
                     if (
@@ -185,7 +178,7 @@ class ScheduleScraper:
                     break  # Stop iterating once there are no more years parsable.
 
         else:  # If the year is specified, then we get only that year.
-            content: Optional[str | Schedule] = self._get_single(
+            content: Optional[str | Schedule] = self.get_single(
                 date_str=date_str, year=year, formatted=formatted, parser=parser
             )
 
