@@ -8,3 +8,6 @@ class CourseNameDoesNotExistException(Exception):
         super().__init__(message)
 
 
+class EmptyScheduleException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
